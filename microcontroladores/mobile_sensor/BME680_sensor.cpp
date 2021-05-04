@@ -3,6 +3,7 @@
 #include <I2C.h>
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
+#include <Math.h>
 
 #define BME_SCK 36
 #define BME_SDI 33
@@ -10,6 +11,7 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME680 bme; // I2C
+float bme_ppm;
 
 void setup() {
   Serial.begin(9600);
@@ -34,8 +36,9 @@ void loop() {
   
   Serial.print(bme.humidity); // Valor da taxa de humidade
 
-  Serial.print(bme.gas_resistance / 1000.0); //Valor da resistencia de VOC em KOhms
+  bme_ppm = (bme.gas_resistance/1000)*Pow(10, 9)*0.64; // calculo de concetração de ohms para ppm
 
-  Serial.println();
+  Serial.print(bme_ppm); //Valor da resistencia de VOC em ppm
+
   delay(2000);
 }
