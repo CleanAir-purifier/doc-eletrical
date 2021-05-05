@@ -4,9 +4,9 @@ void bateria(int nivel);
 void setup() 
 {
  
-  for(int i=2; i<8; i++) pinMode(i, OUTPUT);
+  for(int i=24; i<30; i++) pinMode(i, OUTPUT);
 
-  for(int i=2; i<8; i++) digitalWrite(i, HIGH);
+  for(int i=24; i<30; i++) digitalWrite(i, HIGH);
 
 } 
 
@@ -37,7 +37,7 @@ void bateria(int nivel)
     digitalWrite(26, HIGH);
     digitalWrite(27, HIGH);
     digitalWrite(28, HIGH);
-    digitalWrite(29, !digitalRead(7));
+    digitalWrite(29, !digitalRead(29));
     delay(90);
     
   } 
@@ -49,7 +49,7 @@ void bateria(int nivel)
     digitalWrite(26, HIGH);
     digitalWrite(27, HIGH);
     digitalWrite(28, HIGH);
-    digitalWrite(29, !digitalRead(7));
+    digitalWrite(29, !digitalRead(29));
     delay(150);
 
     } 

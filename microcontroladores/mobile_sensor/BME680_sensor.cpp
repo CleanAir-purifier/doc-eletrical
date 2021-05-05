@@ -5,8 +5,8 @@
 #include "Adafruit_BME680.h"
 #include <Math.h>
 
-#define BME_SCK 36
-#define BME_SDI 33
+#define BME_SCK 36 // Porta SCL do I2C
+#define BME_SDI 33 // Porta SDA do I2C
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -30,15 +30,15 @@ void loop() {
   if (! bme.performReading()) {
     return;
   }
-  Serial.print(bme.temperature); // Valor de temperatura em Celsius
+  // Serial.print(bme.temperature); // Valor de temperatura em Celsius
 
-  Serial.print(bme.pressure / 100.0); // Valor de pressão em hectopascal
+  // Serial.print(bme.pressure / 100.0); // Valor de pressão em hectopascal
   
-  Serial.print(bme.humidity); // Valor da taxa de humidade
+  // Serial.print(bme.humidity); // Valor da taxa de humidade
 
-  bme_ppm = (bme.gas_resistance/1000)*Pow(10, 9)*0.64; // calculo de concetração de ohms para ppm
+  bme_ppm = (bme.gas_resistance/1000)*pow(10, 9)*0.64; // calculo de concetração de ohms para ppm
 
-  Serial.print(bme_ppm); //Valor da resistencia de VOC em ppm
+  // Serial.print(bme_ppm); //Valor da resistencia de VOC em ppm
 
   delay(2000);
 }

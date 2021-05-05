@@ -14,5 +14,5 @@ void loop() {
 
 	dgsSO2ppm = dgsSO2.read() * 0.001; //Conversão de ppb para ppm
 
-	dgsSO2ppm.display(); //Valor do sensor em ppm de SO2
+	// dgsSO2ppm.display(); //Valor do sensor em ppm de SO2
 }

@@ -5,8 +5,7 @@ Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
 void setup() {
   Serial.begin(115200); //Iniciar Serial
   while (!Serial) delay(10);
- 
-  delay(1000);
+   delay(1000);
  
   if (! aqi.begin_I2C()) {      // Conexão do sensor com I2C 
     while (1) delay(10);
