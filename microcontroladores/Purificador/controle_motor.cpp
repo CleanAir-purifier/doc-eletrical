@@ -13,10 +13,10 @@
 #define TOPICO_COVS           "topico_covs_ppm"
 #define TOPICO_FUMACA         "topico_fumaca_ppm"
 #define TOPICO_SO2            "topico_so2_ppm"
-#define TOPICO_TEM            "topico_tem_ppm"
-#define TOPICO_UMI            "topico_umi_ppm"
-#define TOPICO_PRES           "topico_pres_ppm"
-#define TOPICO_BAT            "topico_bat_ppm"
+#define TOPICO_TEM            "topico_tem"
+#define TOPICO_UMI            "topico_umi"
+#define TOPICO_PRES           "topico_pres"
+#define TOPICO_BAT            "topico_bat"
  
 #define ID_MQTT  "esp32_mqtt" 
 
@@ -32,6 +32,7 @@ const char* BROKER_MQTT = "rabbitmq.com"; //URL do broker MQTT que se deseja uti
 int BROKER_PORT = 15672; // Porta do Broker MQTT
 
 int valor_pwm = 0;  //variavel que armazena o valor do PWM (0 = 0% e 1023 = 100% da rotação do motor) 
+int nivel_bateria;
 
 WiFiClient espClient; // Cria o objeto espClient
 PubSubClient MQTT(espClient); // Instancia o Cliente MQTT passando o objeto espClient
@@ -48,7 +49,6 @@ typedef struct {
     float faz_leitura_tem;
     float faz_leitura_umi;
     float faz_leitura_pres;
-    void bateria;
 }SensorData;
 
 void setupWiFi(void);
@@ -103,12 +103,51 @@ void initMQTT(void)
     MQTT.setCallback(mqtt_callback);            //atribui função de callback (função chamada quando qualquer informação de um dos tópicos subescritos chega)
 }
 
-// //Função que avisar quando chegou algo das ESPs
-// void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-//   SensorData* sensorData = (SensorData*) data;
-//   //Envia para o Server MQTT
-//   sendToMQTT(sensorData);
-// }
+//Função que avisar quando chegou algo das ESPs
+void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
+  SensorData* sensorData = (SensorData*) data;
+  //Envia para o Server MQTT
+
+    char oz_str[10]     = {0};
+    char no2_str[10]    = {0};
+    char mp25_str[10]   = {0};
+    char mp100_str[10]  = {0};
+    char covs_str[10]   = {0};
+    char fumaca_str[10] = {0};
+    char so2_str[10]    = {0};
+    char tem_str[10]    = {0};
+    char pres_str[10]   = {0};
+    char umi_str[10]    = {0};
+    char bat_str[10]    = {0};
+
+  /* Compoe as strings a serem enviadas pro dashboard (campos texto) */
+    sprintf(oz_str,"%.2d", SensorData.ozonio);
+    sprintf(no2_str,"%.2d", SensorData.no2);
+    sprintf(fumaca_str,"%.2d", SensorData.fumaca);
+    sprintf(covs_str,"%.2d", SensorData.covs);
+    sprintf(mp25_str,"%.2d", SensorData.mp25);
+    sprintf(mp100_str,"%.2d", SensorData.mp100);
+    sprintf(so2_str,"%.2d", SensorData.so2);
+    sprintf(pres_str,"%.2d", SensorData.pres);
+    sprintf(tem_str,"%.2d", SensorData.tem);
+    sprintf(umi_str,"%.2d", SensorData.umi);
+    sprintf(bat_str,"%.2d", SensorData.bat);
+
+  /*  Envia as strings ao dashboard MQTT */
+
+    MQTT.publish(TOPICO_OZONIO, oz_str);
+    MQTT.publish(TOPICO_NO2, no2_str);
+    MQTT.publish(TOPICO_MP25, mp25_str);
+    MQTT.publish(TOPICO_MP100, mp100_str);
+    MQTT.publish(TOPICO_COVS, covs_str);           
+    MQTT.publish(TOPICO_FUMACA, fumaca_str);         
+    MQTT.publish(TOPICO_SO2, so2_str);    
+    MQTT.publish(TOPICO_TEM, tem_str);           
+    MQTT.publish(TOPICO_PRES, pres_str);         
+    MQTT.publish(TOPICO_UMI, umi_str);  
+    MQTT.publish(TOPICO_BAT, bat_str);   
+
+}
 
 /* Função: função de callback é chamada toda vez que uma informação de um dos tópicos subescritos chega) */
 void mqtt_callback(char* topic, byte* payload, unsigned int length) 
@@ -157,73 +196,13 @@ void setup()
 }
 
 void loop()
-{   //--------------------VERIFICAR CODIGO PPM???------
-    char ozonio_ppm[10] = {0};
-    char no2_ppm[10]    = {0};
-    char mp25_ppm[10]   = {0};
-    char mp100_ppm[10]  = {0};
-    char covs_ppm[10]   = {0};
-    char fumaca_ppm[10] = {0};
-    char so2_ppm[10]    = {0};
-    char tem_ppm[10]    = {0};
-    char pres_ppm[10]    = {0};
-    char umi_ppm[10]    = {0};
-    char bat_ppm[10]    = {0};
-    /* garante funcionamento das conexões WiFi e ao broker MQTT */
+{   /* garante funcionamento das conexões WiFi e ao broker MQTT */
     VerificaConexoesWiFIEMQTT();
  
-    /* Compoe as strings a serem enviadas pro dashboard (campos texto) */
-    sprintf(oz_str,"%.2fC", faz_leitura_ozonio());
-    sprintf(no2_str,"%.2f", faz_leitura_no2());
-    sprintf(fumaca_str,"%.2fC", faz_leitura_fumaca());
-    sprintf(covs_str,"%.2f", faz_leitura_covs());
-    sprintf(mp25_str,"%.2fC", faz_leitura_mp25());
-    sprintf(mp100_str,"%.2f", faz_leitura_mp100());
-    sprintf(so2_str,"%.2fC", faz_leitura_so2());
-    sprintf(pres_str,"%.2f", faz_leitura_pres());
-    sprintf(tem_str,"%.2fC", faz_leitura_tem());
-    sprintf(umi_str,"%.2f", faz_leitura_umi());
-    sprintf(bat_str,"%.2f", bateria());
-
-    /*  Envia as strings ao dashboard MQTT */
-
-    MQTT.publish(TOPICO_OZONIO, oz_str());
-    MQTT.publish(TOPICO_NO2, no2_str());
-    MQTT.publish(TOPICO_MP25, mp25_str());
-    MQTT.publish(TOPICO_MP100, mp100_str());
-    MQTT.publish(TOPICO_COVS, covs_str());           
-    MQTT.publish(TOPICO_FUMACA, fumaca_str());         
-    MQTT.publish(TOPICO_SO2, so2_str());    
-    MQTT.publish(TOPICO_TEM, tem_str());           
-    MQTT.publish(TOPICO_PRES, pres_str());         
-    MQTT.publish(TOPICO_UMI, umi_str());  
-    MQTT.publish(TOPICO_BAT, bat_str());   
-
     /* keep-alive da comunicação com broker MQTT */
     MQTT.loop();
  
     /* Refaz o ciclo após 2 segundos */
     delay(2000);
-   
 }
 
-
-
-// void sendToMQTT(SensorData* sensorData) {
-
-// //----------------VERIFICAR MSG-----------------------------------
-//   //Criamos o json que enviaremos para o server MQTT
-//   String msg = createJsonString(sensorData);
-
-//   //Publicamos no tópico onde o servidor espera para receber 
-//   //e gerar o gráfico
-// client.publish(TOPICO_MOTOR, msg.c_str());
-
-// client.publish(TOPICO_OZONIO, msg.c_str());
-// client.publish(TOPICO_NO2, msg.c_str());
-// client.publish(TOPICO_MP25, msg.c_str());
-// client.publish(TOPICO_MP100, msg.c_str());
-// client.publish(TOPICO_COVS, msg.c_str());           
-// client.publish(TOPICO_FUMACA, msg.c_str());         
-// client.publish(TOPICO_SO2, msg.c_str());            
-// }
