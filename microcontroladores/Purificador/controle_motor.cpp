@@ -22,7 +22,7 @@
 
 //Nome do tópico que devemos enviar os dados
 //para que eles apareçam nos gráficos
-#define TOPIC_NAME "iot-2/evt/status/fmt/json" //Falar com soft
+#define TOPIC_NAME "iot-2/evt/status/fmt/json" //Software
 
 
 const char* SSID = " "; // SSID / nome da rede WI-FI que deseja se conectar
