@@ -50,7 +50,7 @@ typedef struct {
 	float faz_leitura_tem;
 	float faz_leitura_umi;
 	float faz_leitura_pres;
-	void bateria;
+	int nivel_bateria;
 }SensorData;
 
 //Guarda os valores dos dispositivos lidos para serem enviados para o gateway

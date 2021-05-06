@@ -21,7 +21,7 @@ int faz_leitura_no2(int PinNO2){
 	return valor_analogico_mics;
 }
 
-float faz_leitura_covs {
+float faz_leitura_covs() {
 
   if (! bme.performReading()) {
   
@@ -34,7 +34,7 @@ float faz_leitura_covs {
 
 }
 
-float faz_leitura_mp25{
+float faz_leitura_mp25(){
   PM25_AQI_Data data;
   
   if (! aqi.read(&data)) {
@@ -44,7 +44,7 @@ float faz_leitura_mp25{
 	return data.pm25_standard; // Retornar valor medido de MP de 10.0um
 	delay(1000);
 }
-float faz_leitura_mp100{
+float faz_leitura_mp100(){
 
 PM25_AQI_Data data;
   
@@ -55,7 +55,7 @@ PM25_AQI_Data data;
 	return data.pm100_standard; // Retornar valor medido de MP de 10.0um
 	delay(1000);
 }
-float faz_leitura_so2{
+float faz_leitura_so2(){
 
 	dgsSO2.read(); // Valor medido de SO2 em ppb
 
@@ -63,15 +63,15 @@ float faz_leitura_so2{
 	return dgsSO2ppm; //Retorna valor do sensor em ppm de SO2
 }
 
-float faz_leitura_temp{
+float faz_leitura_temp(){
 	if (! bme.performReading()) {
   
   	return;
   }
 	return bme.temperature; // Retorna valor de temperatura em Celsius
 	delay(2000);
-
-float faz_leitura_umi{
+}
+float faz_leitura_umi(){
 	if (! bme.performReading()) {
   
   	return;
@@ -79,7 +79,7 @@ float faz_leitura_umi{
 	return bme.humidity; // Retorna valor da taxa de humidade
 	delay(2000);
 }
-float faz_leitura_pres{
+float faz_leitura_pres(){
 	if (! bme.performReading()) {
   
   	return;
@@ -90,6 +90,7 @@ float faz_leitura_pres{
 
 void bateria(int nivel)
 {
+  nivel = analogRead(9); 
   
   if(nivel < 50)
   {
