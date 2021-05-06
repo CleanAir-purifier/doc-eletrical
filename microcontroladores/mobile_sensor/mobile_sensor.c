@@ -56,43 +56,6 @@ typedef struct {
 //Guarda os valores dos dispositivos lidos para serem enviados para o gateway
 SensorData sensorData;
 
-void setup(){
-
-Serial.begin(115200);//Iniciar Serial
-
-
-setupWiFi(); //Inicializa a WiFi
-
-setupEspNow(); //Inicializa o ESPNow e adiciona o callback de envio
-
-
-addGatewayAsPeer();//Adiciona o gateway como um peer do ESPNOW
-
-pinMode(PinA02, INPUT); //Definição do pino como entrada do MQ2
-pinMode(PinA01, INPUT); //Definição do pino como entrada do MQ131
-pinMode(PinNO2, INPUT); //Definição do pino como entrada do MICS
-
-	while (!Serial);
-	if (!bme.begin()) {
-	while (1);
-	}
-
-bme.setTemperatureOversampling(BME680_OS_8X);
-bme.setHumidityOversampling(BME680_OS_2X);
-bme.setPressureOversampling(BME680_OS_4X);
-bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-bme.setGasHeater(320, 150); 
-
-dgs.begin();
-
-	if (! aqi.begin_I2C()) { // Conexão do sensor com I2C 
-	while (1) delay(10);
-	}
-
-	for(int i=24; i<30; i++) pinMode(i, OUTPUT);
-	for(int i=24; i<30; i++) digitalWrite(i, HIGH);
-
-}
 
 void setupWiFi() {
   
@@ -130,6 +93,80 @@ Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 
 }
 
+void sendSensorData() {
+//Envia a struct para o gateway
+esp_err_t result = esp_now_send(gatewayMacAdress, (uint8_t*) &sensorData, sizeof(sensorData));
+// Serial.print("Send Status: ");
+// //Se o envio foi bem sucedido
+// if (result == ESP_OK) {
+// Serial.println("Success");
+// }
+// //Se aconteceu algum erro no envio
+// else {
+// Serial.println("Error");
+//   }
+}
+void readSensor() {
+
+//Faz a leitura dos dispositivos
+int oz, no2, fumaca, bat;
+float so2, mp25, mp100, covs, tem, umi, pres;
+
+//Guarda na struct a id e os valores dos dispositivos
+strcpy(sensorData.id, ID);
+sensorData.faz_leitura_ozonio = faz_leitura_ozonio(PinA01);
+sensorData.faz_leitura_no2 = faz_leitura_no2(PinNO2);
+sensorData.faz_leitura_fumaca = faz_leitura_fumaca(PinA02);
+sensorData.faz_leitura_so2 = faz_leitura_so2();
+sensorData.faz_leitura_mp25 = faz_leitura_mp25();
+sensorData.faz_leitura_mp100 = faz_leitura_mp100();
+sensorData.faz_leitura_covs = faz_leitura_covs();
+sensorData.faz_leitura_tem = faz_leitura_temp();
+sensorData.faz_leitura_umi = faz_leitura_umi();
+sensorData.faz_leitura_pres = faz_leitura_pres();
+bateria(sensorData.bateria);
+
+}
+
+
+void setup(){
+
+Serial.begin(115200);//Iniciar Serial
+
+
+setupWiFi(); //Inicializa a WiFi
+
+setupEspNow(); //Inicializa o ESPNow e adiciona o callback de envio
+
+
+addGatewayAsPeer();//Adiciona o gateway como um peer do ESPNOW
+
+pinMode(PinA02, INPUT); //Definição do pino como entrada do MQ2
+pinMode(PinA01, INPUT); //Definição do pino como entrada do MQ131
+pinMode(PinNO2, INPUT); //Definição do pino como entrada do MICS
+
+  while (!Serial);
+  if (!bme.begin()) {
+  while (1);
+  }
+
+bme.setTemperatureOversampling(BME680_OS_8X);
+bme.setHumidityOversampling(BME680_OS_2X);
+bme.setPressureOversampling(BME680_OS_4X);
+bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+bme.setGasHeater(320, 150); 
+
+dgs.begin();
+
+  if (! aqi.begin_I2C()) { // Conexão do sensor com I2C 
+  while (1) delay(10);
+  }
+
+  for(int i=24; i<30; i++) pinMode(i, OUTPUT);
+  for(int i=24; i<30; i++) digitalWrite(i, HIGH);
+
+}
+
 void loop()
 {
   uint32_t now = millis();
@@ -148,38 +185,3 @@ void loop()
   }
 }
 
-void readSensor() {
-
-//Faz a leitura da temperatura e umidade
-int oz, no2, fumaca, bat;
-float so2, mp25, mp100, covs, tem, umi, pres;
-
-//Guarda na struct a id e os valores da umidade e da temperatura
-strcpy(sensorData.id, ID);
-sensorData.faz_leitura_ozonio = oz;
-sensorData.faz_leitura_no2 = no2;
-sensorData.faz_leitura_fumaca = fumaca;
-sensorData.faz_leitura_so2 = so2;
-sensorData.faz_leitura_mp25 = mp25;
-sensorData.faz_leitura_mp100 = mp100;
-sensorData.faz_leitura_covs = covs;
-sensorData.faz_leitura_tem = tem;
-sensorData.faz_leitura_umi = umi;
-sensorData.faz_leitura_pres = pres;
-sensorData.bateria = bat;
-
-}
-
-void sendSensorData() {
-//Envia a struct para o gateway
-esp_err_t result = esp_now_send(gatewayMacAdress, (uint8_t*) &sensorData, sizeof(sensorData));
-// Serial.print("Send Status: ");
-// //Se o envio foi bem sucedido
-// if (result == ESP_OK) {
-// Serial.println("Success");
-// }
-// //Se aconteceu algum erro no envio
-// else {
-// Serial.println("Error");
-//   }
-}
